@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TourEase — plan trips around the people who actually live there</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2B22;
+    --pine:#2F5233;
+    --pine-dark:#16241B;
+    --pine-darker:#101B14;
+    --mist:#EEF3EA;
+    --marigold:#D98F1B;
+    --marigold-dark:#B5730F;
+    --slate:#5C6B5F;
+    --paper:#FFFFFF;
+    --line:#DCE4D8;
+    --font-display:'Fraunces', serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --container:1180px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{
+    font-family:var(--font-display);
+    font-weight:600;
+    line-height:1.1;
+    margin:0;
+    color:var(--ink);
+  }
+
+  p{margin:0;}
+  ul{margin:0; padding:0; list-style:none;}
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  .wrap{
+    max-width:var(--container);
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  section{padding:96px 0;}
+  @media (max-width:720px){ section{padding:64px 0;} }
+
+  .bg-mist{background:var(--mist);}
+  .bg-dark{background:var(--pine-dark); color:#EDF2EA;}
+  .bg-dark h1, .bg-dark h2, .bg-dark h3{color:#F5F8F3;}
+  .bg-darker{background:var(--pine-darker); color:#DCE6DD;}
+
+  .eyebrow{
+    font-family:var(--font-body);
+    font-size:0.95rem;
+    color:var(--slate);
+    margin-bottom:14px;
+  }
+  .bg-dark .eyebrow{color:#B9CBB9;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:13px 26px;
+    border-radius:999px;
+    font-size:0.98rem;
+    font-weight:600;
+    text-decoration:none;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:focus-visible{outline:3px solid var(--marigold); outline-offset:2px;}
+
+  .btn-primary{
+    background:var(--marigold);
+    color:var(--pine-darker);
+  }
+  .btn-primary:hover{background:var(--marigold-dark);}
+
+  .btn-ghost{
+    background:transparent;
+    color:inherit;
+    border-color:currentColor;
+    opacity:0.9;
+  }
+  .btn-ghost:hover{opacity:1; background:rgba(255,255,255,0.08);}
+
+  .btn-ghost.on-light{
+    color:var(--ink);
+    border-color:var(--line);
+  }
+  .btn-ghost.on-light:hover{background:var(--mist); border-color:var(--pine);}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-top:16px; padding-bottom:16px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:1.3rem;
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .brand svg{flex:none;}
+  .nav-links{
+    display:flex; align-items:center; gap:32px;
+  }
+  .nav-links a{
+    text-decoration:none;
+    color:var(--ink);
+    font-size:0.95rem;
+    font-weight:500;
+  }
+  .nav-links a:hover{color:var(--pine);}
+  .nav-cta{display:flex; align-items:center; gap:14px;}
+  .nav-toggle{
+    display:none;
+    background:none; border:none; cursor:pointer;
+    padding:6px;
+  }
+  @media (max-width:860px){
+    .nav-links{
+      position:absolute; top:100%; left:0; right:0;
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
+      flex-direction:column;
+      align-items:flex-start;
+      gap:0;
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .25s ease;
+    }
+    .nav-links.open{max-height:320px;}
+    .nav-links a{
+      padding:16px 28px;
+      width:100%;
+      border-bottom:1px solid var(--line);
+    }
+    .nav-cta .btn-ghost{display:none;}
+    .nav-toggle{display:block;}
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding-top:88px;
+    padding-bottom:110px;
+  }
+  .hero-ridges{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    opacity:0.9;
+  }
+  .hero-inner{
+    position:relative; z-index:2;
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:48px;
+    align-items:end;
+  }
+  @media (max-width:900px){
+    .hero-inner{grid-template-columns:1fr;}
+  }
+  .hero-copy{
+    animation:rise .7s ease both;
+  }
+  @keyframes rise{
+    from{opacity:0; transform:translateY(14px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .hero h1{
+    font-size:clamp(2.5rem, 4vw + 1rem, 4.1rem);
+    max-width:15ch;
+    letter-spacing:-0.01em;
+  }
+  .hero-sub{
+    margin-top:22px;
+    font-size:1.15rem;
+    max-width:46ch;
+    color:#D9E4D9;
+  }
+  .hero-ctas{
+    margin-top:36px;
+    display:flex; flex-wrap:wrap; gap:14px;
+  }
+  .hero-note{
+    display:grid;
+    gap:18px;
+    padding:26px;
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:18px;
+    background:rgba(255,255,255,0.05);
+  }
+  .hero-note-row{
+    display:flex; gap:14px; align-items:flex-start;
+  }
+  .hero-note-row svg{flex:none; margin-top:3px;}
+  .hero-note-row p{font-size:0.95rem; color:#D9E4D9;}
+  .hero-note-row strong{display:block; color:#F5F8F3; font-weight:600; margin-bottom:2px;}
+
+  /* ---------- GENERIC SECTION HEAD ---------- */
+  .section-head{
+    max-width:640px;
+    margin-bottom:52px;
+  }
+  .section-head.center{margin-left:auto; margin-right:auto; text-align:center;}
+  .section-head h2{font-size:clamp(1.9rem, 2vw + 1.2rem, 2.6rem);}
+  .section-head p{margin-top:16px; font-size:1.08rem; color:var(--slate);}
+
+  /* ---------- PROBLEM ---------- */
+  .problem-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:56px;
+  }
+  @media (max-width:820px){ .problem-grid{grid-template-columns:1fr;} }
+  .problem-grid h3{font-size:1.3rem; margin-bottom:14px;}
+  .problem-grid p{color:var(--slate); font-size:1.02rem;}
+  .problem-list{margin-top:18px; display:grid; gap:12px;}
+  .problem-list li{
+    display:flex; gap:12px; align-items:flex-start;
+    color:var(--slate); font-size:0.98rem;
+  }
+  .problem-list li svg{flex:none; margin-top:4px; color:var(--marigold);}
+
+  /* ---------- PLANNER ---------- */
+  .planner-shell{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+    align-items:start;
+  }
+  @media (max-width:900px){ .planner-shell{grid-template-columns:1fr;} }
+
+  .planner-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:32px;
+  }
+  .field{margin-bottom:26px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block;
+    font-weight:600;
+    font-size:0.92rem;
+    margin-bottom:10px;
+  }
+  .field select{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-family:inherit;
+    font-size:0.98rem;
+    color:var(--ink);
+  }
+  .stepper{
+    display:flex; align-items:center; gap:16px;
+  }
+  .stepper button{
+    width:38px; height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-size:1.2rem;
+    cursor:pointer;
+    line-height:1;
+  }
+  .stepper button:hover{border-color:var(--pine); color:var(--pine);}
+  .stepper span{font-size:1.05rem; font-weight:600; min-width:70px; text-align:center;}
+
+  .range-row{display:flex; align-items:center; gap:14px;}
+  input[type="range"]{
+    flex:1;
+    accent-color:var(--marigold);
+  }
+  .range-value{font-weight:600; font-size:0.95rem; min-width:96px; text-align:right;}
+
+  .chip-group{display:flex; flex-wrap:wrap; gap:10px;}
+  .chip{
+    padding:9px 16px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-size:0.9rem;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .chip:hover{border-color:var(--pine);}
+  .chip.is-active{
+    background:var(--pine);
+    border-color:var(--pine);
+    color:#fff;
+  }
+
+  .planner-submit{
+    margin-top:30px;
+    width:100%;
+    justify-content:center;
+    padding:14px 26px;
+  }
+
+  .itinerary{
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:32px;
+    min-height:420px;
+    display:flex;
+    flex-direction:column;
+  }
+  .itinerary-placeholder{
+    margin:auto;
+    text-align:center;
+    color:var(--slate);
+    max-width:32ch;
+  }
+  .itinerary-placeholder svg{margin-bottom:16px;}
+  .itinerary-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:18px;
+    flex-wrap:wrap; gap:6px;
+  }
+  .itinerary-head h3{font-size:1.15rem;}
+  .itinerary-head span{font-size:0.85rem; color:var(--slate);}
+  .itinerary-list{
+    display:grid; gap:16px;
+    max-height:520px;
+    overflow-y:auto;
+    padding-right:4px;
+  }
+  .day-card{
+    border-left:2px solid var(--marigold);
+    padding:4px 0 4px 16px;
+  }
+  .day-card .day-title{
+    font-weight:600; font-size:0.92rem; margin-bottom:4px;
+  }
+  .day-card p{font-size:0.92rem; color:var(--slate);}
+  .itinerary-foot{
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:0.85rem;
+    color:var(--slate);
+  }
+
+  /* ---------- WORKING FLOW ---------- */
+  .flow-row{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:20px;
+  }
+  @media (max-width:960px){ .flow-row{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .flow-row{grid-template-columns:1fr;} }
+  .flow-step{
+    position:relative;
+    padding-top:20px;
+  }
+  .flow-step-num{
+    font-family:var(--font-display);
+    font-size:1.6rem;
+    color:var(--marigold-dark);
+    margin-bottom:14px;
+  }
+  .flow-step h3{font-size:1.02rem; margin-bottom:8px;}
+  .flow-step p{font-size:0.9rem; color:var(--slate);}
+
+  .modules-strip{
+    margin-top:56px;
+    padding-top:36px;
+    border-top:1px solid var(--line);
+  }
+  .modules-strip h3{font-size:1rem; margin-bottom:16px; color:var(--slate); font-weight:600; font-family:var(--font-body);}
+  .module-tags{display:flex; flex-wrap:wrap; gap:10px;}
+  .module-tags span{
+    padding:8px 14px;
+    border-radius:999px;
+    background:var(--mist);
+    font-size:0.85rem;
+    color:var(--ink);
+  }
+
+  /* ---------- ECOSYSTEM DIAGRAM ---------- */
+  .diagram-wrap{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:56px;
+    align-items:center;
+  }
+  @media (max-width:900px){ .diagram-wrap{grid-template-columns:1fr;} }
+
+  .diagram{
+    position:relative;
+    width:100%;
+    max-width:520px;
+    aspect-ratio:1/1;
+    margin:0 auto;
+  }
+  .diagram svg.lines{position:absolute; inset:0; width:100%; height:100%;}
+  .node{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    padding:12px 14px;
+    border-radius:14px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    font-size:0.82rem;
+    font-weight:600;
+    width:118px;
+    line-height:1.25;
+  }
+  .node.hub{
+    width:132px;
+    padding:18px 14px;
+    border-radius:50%;
+    background:var(--pine);
+    color:#fff;
+    border:none;
+    font-family:var(--font-display);
+    font-size:1.05rem;
+    display:flex; align-items:center; justify-content:center;
+    aspect-ratio:1/1;
+  }
+  @media (max-width:700px){
+    .diagram{display:none;}
+    .diagram-fallback{display:grid !important;}
+  }
+  .diagram-fallback{
+    display:none;
+    grid-template-columns:1fr;
+    gap:10px;
+    max-width:520px;
+    margin:0 auto;
+  }
+  .diagram-fallback .hub-row{
+    background:var(--pine); color:#fff;
+    border-radius:14px; padding:16px; text-align:center;
+    font-family:var(--font-display); font-size:1.1rem;
+  }
+  .diagram-fallback .node-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  }
+  .diagram-fallback .node{position:static; transform:none; width:auto; text-align:left;}
+
+  .impact-list{margin-top:8px;}
+  .impact-item{
+    padding:22px 0;
+    border-top:1px solid var(--line);
+  }
+  .impact-item:last-child{border-bottom:1px solid var(--line);}
+  .impact-item h3{font-size:1.05rem; margin-bottom:6px;}
+  .impact-item p{color:var(--slate); font-size:0.95rem;}
+
+  /* ---------- FEASIBILITY ---------- */
+  .feas-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:0;
+    border-top:1px solid var(--line);
+  }
+  @media (max-width:820px){ .feas-grid{grid-template-columns:1fr;} }
+  .feas-col{
+    padding:28px 28px 28px 0;
+    border-right:1px solid var(--line);
+  }
+  .feas-col:last-child{border-right:none;}
+  @media (max-width:820px){
+    .feas-col{border-right:none; border-bottom:1px solid var(--line); padding:24px 0;}
+    .feas-col:last-child{border-bottom:none;}
+  }
+  .feas-col h3{font-size:1.05rem; margin-bottom:14px;}
+  .feas-col ul{display:grid; gap:10px;}
+  .feas-col li{
+    font-size:0.92rem; color:var(--slate);
+    padding-left:16px; position:relative;
+  }
+  .feas-col li::before{
+    content:"";
+    position:absolute; left:0; top:0.55em;
+    width:5px; height:5px; border-radius:50%;
+    background:var(--marigold);
+  }
+
+  /* ---------- ROADMAP ---------- */
+  .timeline{
+    display:flex;
+    justify-content:space-between;
+    position:relative;
+    gap:8px;
+  }
+  .timeline::before{
+    content:"";
+    position:absolute;
+    top:11px; left:0; right:0;
+    height:1px;
+    background:var(--line);
+  }
+  @media (max-width:820px){
+    .timeline{flex-direction:column; gap:28px;}
+    .timeline::before{top:0; bottom:0; left:11px; right:auto; width:1px; height:auto;}
+  }
+  .t-step{
+    position:relative;
+    flex:1;
+    padding-top:36px;
+  }
+  @media (max-width:820px){ .t-step{padding-top:0; padding-left:36px;} }
+  .t-dot{
+    position:absolute; top:0; left:0;
+    width:23px; height:23px; border-radius:50%;
+    background:var(--paper);
+    border:2px solid var(--pine);
+  }
+  @media (max-width:820px){ .t-dot{top:1px;} }
+  .t-step h3{font-size:0.98rem; margin-bottom:6px;}
+  .t-step p{font-size:0.85rem; color:var(--slate);}
+
+  /* ---------- PROVIDERS CTA ---------- */
+  .providers{
+    text-align:center;
+  }
+  .providers .section-head{margin:0 auto 30px;}
+  .providers h2{max-width:20ch; margin:0 auto;}
+  .providers p{color:#D9E4D9; max-width:52ch; margin:18px auto 0; font-size:1.05rem;}
+  .providers .hero-ctas{justify-content:center; margin-top:32px;}
+
+  /* ---------- UNDER THE HOOD ---------- */
+  .stack-row{
+    display:flex; flex-wrap:wrap; gap:10px;
+    margin-top:20px;
+  }
+  .stack-row span{
+    font-size:0.82rem;
+    padding:7px 13px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--slate);
+  }
+  .under-hood .wrap{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:40px;
+    flex-wrap:wrap;
+  }
+  .under-hood h2{font-size:1.3rem;}
+  .under-hood-copy{max-width:340px;}
+  .under-hood-copy p{color:var(--slate); font-size:0.95rem; margin-top:10px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:56px 0 34px;
+  }
+  .foot-top{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:32px; flex-wrap:wrap;
+    padding-bottom:32px;
+    border-bottom:1px solid rgba(255,255,255,0.12);
+  }
+  .foot-brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-size:1.2rem;}
+  .foot-links{display:flex; gap:28px; flex-wrap:wrap;}
+  .foot-links a{text-decoration:none; font-size:0.9rem; color:#CBDACB;}
+  .foot-links a:hover{color:#fff;}
+  .foot-bottom{
+    padding-top:22px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    font-size:0.82rem; color:#9DB09E;
+  }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible{
+    outline:3px solid var(--marigold);
+    outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="#top" class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 19L9.5 8L13.5 14.5L16 11L23 19" stroke="#2F5233" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="6.5" r="2.5" fill="#D98F1B"/></svg>
+      TourEase
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#problem">Why TourEase</a></li>
+      <li><a href="#planner">Trip planner</a></li>
+      <li><a href="#flow">How it works</a></li>
+      <li><a href="#providers">For providers</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#providers" class="btn btn-ghost on-light">List your stay</a>
+      <a href="#planner" class="btn btn-primary">Plan a trip</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6H21M3 12H21M3 18H21" stroke="#1C2B22" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero bg-dark" id="top">
+  <svg class="hero-ridges" viewBox="0 0 1200 620" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 480 L120 380 L220 440 L320 320 L420 420 L520 300 L640 410 L760 330 L880 430 L1000 350 L1120 420 L1200 380 L1200 620 L0 620 Z" fill="#1E2F22"/>
+    <path d="M0 540 L150 460 L260 510 L380 420 L500 500 L620 410 L740 500 L860 430 L980 510 L1100 440 L1200 480 L1200 620 L0 620 Z" fill="#213524"/>
+    <path d="M0 600 Q 200 540 400 590 T 800 580 T 1200 600 L1200 620 L0 620 Z" fill="#243B27"/>
+    <path d="M0 480 L120 380 L220 440 L320 320 L420 420 L520 300 L640 410 L760 330 L880 430 L1000 350 L1120 420 L1200 380" stroke="#D98F1B" stroke-opacity="0.35" stroke-width="1.5" fill="none"/>
+  </svg>
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <div class="eyebrow">Built for the Garhwal &amp; Kumaon Himalayas</div>
+      <h1>Local tourism, mapped by people who actually live there.</h1>
+      <p class="hero-sub">TourEase plans your trip around real homestays, guides and small local businesses — not just the same five hotels every booking app already shows you.</p>
+      <div class="hero-ctas">
+        <a href="#planner" class="btn btn-primary">Try the trip planner</a>
+        <a href="#providers" class="btn btn-ghost">List your stay or service</a>
+      </div>
+    </div>
+    <div class="hero-note">
+      <div class="hero-note-row">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8.5" stroke="#D98F1B" stroke-width="1.4"/><path d="M10 6V10L12.5 12" stroke="#D98F1B" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <p><strong>One ecosystem, not another hotel app.</strong>Stays, guides, transport and local experiences, matched to you in one pass.</p>
+      </div>
+      <div class="hero-note-row">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10C3 6.13 6.13 3 10 3C13.87 3 17 6.13 17 10C17 13.87 13.87 17 10 17" stroke="#D98F1B" stroke-width="1.4" stroke-linecap="round"/><path d="M3 10C3 13.87 6.13 17 10 17" stroke="#D98F1B" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="1 3.5"/></svg>
+        <p><strong>Built for patchy signal.</strong>Lightweight pages and cached essentials for the hills and valleys where the network drops.</p>
+      </div>
+      <div class="hero-note-row">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3L11.9 7.5L17 8.1L13.2 11.3L14.4 16.2L10 13.6L5.6 16.2L6.8 11.3L3 8.1L8.1 7.5L10 3Z" stroke="#D98F1B" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        <p><strong>Learns as it goes.</strong>Every review and rebooking sharpens what it recommends next time.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap problem-grid">
+    <div>
+      <h2 style="font-size:clamp(1.9rem, 2vw + 1.2rem, 2.6rem); max-width:14ch;">Planning a trip here usually means five tabs and a guess.</h2>
+      <p style="margin-top:18px; font-size:1.05rem; color:var(--slate);">Homestays live in WhatsApp groups. Guides get found by word of mouth. Local transport isn't on any map app. Most of what actually makes a place worth visiting never shows up in a search — so travellers default to the same few hotels, and everyone else stays invisible.</p>
+    </div>
+    <div>
+      <h3>What TourEase changes</h3>
+      <ul class="problem-list">
+        <li>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 9.5L7 13L14.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>One place to find stays, guides, transport and local experiences together</span>
+        </li>
+        <li>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 9.5L7 13L14.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>An AI planner that works from your budget, days, interests and location</span>
+        </li>
+        <li>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 9.5L7 13L14.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Visibility for small tourism businesses that have never had a digital storefront</span>
+        </li>
+        <li>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 9.5L7 13L14.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>A way to find the lesser-known destination, not just the crowded one</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="planner" class="bg-mist">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Try it yourself</div>
+      <h2>Tell it what you're after.</h2>
+      <p>Set your days, budget, interests and a region — TourEase drafts a route using local stays, guides and experiences. This is a preview of the planning logic; the live product matches against TourEase's real provider network.</p>
+    </div>
+
+    <div class="planner-shell">
+      <div class="planner-card">
+        <div class="field">
+          <label for="region">Region</label>
+          <select id="region">
+            <option value="Garhwal high hills">Garhwal high hills</option>
+            <option value="Kumaon lake belt">Kumaon lake belt</option>
+            <option value="Char Dham corridor">Char Dham corridor</option>
+            <option value="Valley of Flowers &amp; Bhyundar">Valley of Flowers &amp; Bhyundar</option>
+            <option value="Offbeat village circuits">Offbeat village circuits</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="days">Days</label>
+          <div class="stepper">
+            <button type="button" id="daysMinus" aria-label="Decrease days">−</button>
+            <span id="daysValue">4</span>
+            <button type="button" id="daysPlus" aria-label="Increase days">+</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="budget">Budget per day</label>
+          <div class="range-row">
+            <input type="range" id="budget" min="800" max="6000" step="100" value="2000">
+            <span class="range-value" id="budgetValue">₹2,000</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Interests</label>
+          <div class="chip-group" id="interestGroup">
+            <button type="button" class="chip is-active" data-key="trek">Trekking &amp; nature</button>
+            <button type="button" class="chip" data-key="temple">Temples &amp; pilgrimage</button>
+            <button type="button" class="chip" data-key="food">Food &amp; local markets</button>
+            <button type="button" class="chip" data-key="offbeat">Offbeat villages</button>
+            <button type="button" class="chip" data-key="adventure">Adventure sports</button>
+            <button type="button" class="chip" data-key="wellness">Wellness &amp; slow travel</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary planner-submit" id="generateBtn">Generate itinerary</button>
+      </div>
+
+      <div class="itinerary" id="itineraryPanel">
+        <div class="itinerary-placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 34L18 14L24 24L28 18L34 30" stroke="#5C6B5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30" cy="10" r="3.5" stroke="#5C6B5F" stroke-width="1.8"/></svg>
+          <p>Your route will appear here — pick a region, set your days and interests, then generate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="flow">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Technical approach</div>
+      <h2>How TourEase builds a trip.</h2>
+      <p>Five steps, running the same loop every time — and getting sharper with each one.</p>
+    </div>
+
+    <div class="flow-row">
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <h3>User input</h3>
+        <p>Budget, days, interests and location — the starting shape of the trip.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <h3>AI matching</h3>
+        <p>Preferences run against real tourism data: providers, availability and location.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <h3>AI itinerary</h3>
+        <p>A route with stay, guide and activities, ranked by fit and filtered by budget and time.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">04</div>
+        <h3>Choose &amp; book</h3>
+        <p>Compare options, then contact or book directly with the local provider.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">05</div>
+        <h3>Learn</h3>
+        <p>Travel, spending and reviews feed back in, sharpening the next recommendation.</p>
+      </div>
+    </div>
+
+    <div class="modules-strip">
+      <h3>System modules</h3>
+      <div class="module-tags">
+        <span>Tourist app</span>
+        <span>Provider dashboard</span>
+        <span>Admin verification</span>
+        <span>Tourism database</span>
+        <span>Review &amp; trust layer</span>
+        <span>Analytics</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ecosystem" class="bg-mist">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Impact and benefits</div>
+      <h2>One hub, many local partners.</h2>
+      <p>TourEase sits between tourists and the destinations they're heading to — connecting the businesses that make a trip worth taking.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div>
+        <div class="diagram" id="diagram">
+          <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <line x1="50" y1="50" x2="50" y2="6" stroke="#C3D2C1" stroke-width="0.6"/>
+            <line x1="50" y1="50" x2="85" y2="24" stroke="#C3D2C1" stroke-width="0.6"/>
+            <line x1="50" y1="50" x2="85" y2="70" stroke="#C3D2C1" stroke-width="0.6"/>
+            <line x1="50" y1="50" x2="50" y2="92" stroke="#C3D2C1" stroke-width="0.6"/>
+            <line x1="50" y1="50" x2="15" y2="70" stroke="#C3D2C1" stroke-width="0.6"/>
+            <line x1="50" y1="50" x2="15" y2="24" stroke="#C3D2C1" stroke-width="0.6"/>
+          </svg>
+          <div class="node" style="top:5%; left:50%;">Destinations</div>
+          <div class="node" style="top:23%; left:85%;">Guides</div>
+          <div class="node" style="top:69%; left:85%;">Transport</div>
+          <div class="node" style="top:91%; left:50%;">Local businesses</div>
+          <div class="node" style="top:69%; left:15%;">Homestays &amp; hotels</div>
+          <div class="node" style="top:23%; left:15%;">Tourists</div>
+          <div class="node hub" style="top:50%; left:50%;">TourEase</div>
+        </div>
+
+        <div class="diagram-fallback">
+          <div class="node-grid">
+            <div class="node">Tourists</div>
+            <div class="node">Destinations</div>
+          </div>
+          <div class="hub-row">TourEase</div>
+          <div class="node-grid">
+            <div class="node">Homestays &amp; hotels</div>
+            <div class="node">Guides</div>
+          </div>
+          <div class="node-grid">
+            <div class="node">Local businesses</div>
+            <div class="node">Transport</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="impact-list">
+        <div class="impact-item">
+          <h3>Social</h3>
+          <p>More local participation in tourism, and cultural visibility for places that rarely get seen.</p>
+        </div>
+        <div class="impact-item">
+          <h3>Economic</h3>
+          <p>More leads for small providers, and tourism income that stays closer to the local economy.</p>
+        </div>
+        <div class="impact-item">
+          <h3>Tourism</h3>
+          <p>Better distribution of visitors, easing pressure on the handful of destinations that get all the traffic.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="feasibility">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Feasibility and viability</div>
+      <h2>Built to survive patchy signal and slow trust.</h2>
+      <p>An honest look at what makes this workable now, where it can break, and how we're handling it.</p>
+    </div>
+
+    <div class="feas-grid">
+      <div class="feas-col">
+        <h3>Why it's feasible</h3>
+        <ul>
+          <li>Built on existing web, AI, GPS and cloud technology</li>
+          <li>Prototype can start with a handful of selected destinations</li>
+          <li>Providers onboard gradually, not all at once</li>
+          <li>Same architecture scales region by region</li>
+          <li>Low-data design supports remote areas</li>
+        </ul>
+      </div>
+      <div class="feas-col">
+        <h3>Where it can break</h3>
+        <ul>
+          <li>Incorrect or outdated tourism information</li>
+          <li>Low digital literacy among some providers</li>
+          <li>Weak network coverage in remote locations</li>
+          <li>Slow adoption in the early stages</li>
+          <li>Building trust and consistent service quality</li>
+        </ul>
+      </div>
+      <div class="feas-col">
+        <h3>How we handle it</h3>
+        <ul>
+          <li>Provider verification plus admin moderation</li>
+          <li>Simple UI with assisted onboarding for providers</li>
+          <li>Cached essential information and lightweight pages</li>
+          <li>Pilot phase with local tourism partners</li>
+          <li>Ratings, reviews and a reporting layer</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-mist" id="roadmap">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Implementation roadmap</div>
+      <h2>Five phases, in order.</h2>
+    </div>
+
+    <div class="timeline">
+      <div class="t-step">
+        <div class="t-dot"></div>
+        <h3>Basic model</h3>
+        <p>Core planner and provider listings, live in a pilot region.</p>
+      </div>
+      <div class="t-step">
+        <div class="t-dot"></div>
+        <h3>Testing &amp; improvement</h3>
+        <p>Real trips, real feedback, fixing what doesn't hold up.</p>
+      </div>
+      <div class="t-step">
+        <div class="t-dot"></div>
+        <h3>Growth &amp; expansion</h3>
+        <p>More providers, more destinations, same architecture.</p>
+      </div>
+      <div class="t-step">
+        <div class="t-dot"></div>
+        <h3>AI integration</h3>
+        <p>Deeper recommendation and itinerary logic, tuned on real usage.</p>
+      </div>
+      <div class="t-step">
+        <div class="t-dot"></div>
+        <h3>Regional scaling</h3>
+        <p>Rolling the same model out region by region.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="providers" class="bg-dark providers">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">For homestays, guides &amp; local businesses</div>
+      <h2>Get discovered by travellers already planning a trip to you.</h2>
+      <p>No commission-hungry marketplace tricks — just a listing, a verification step, and direct contact from tourists building their route.</p>
+    </div>
+    <div class="hero-ctas">
+      <a href="#" class="btn btn-primary">Apply to list your service</a>
+    </div>
+  </div>
+</section>
+
+<section class="under-hood">
+  <div class="wrap">
+    <div class="under-hood-copy">
+      <h2>Under the hood</h2>
+      <p>A straightforward stack, chosen to stay light on remote networks and easy to extend region by region.</p>
+    </div>
+    <div>
+      <div class="stack-row">
+        <span>React / Next.js</span>
+        <span>Python / FastAPI</span>
+        <span>Recommendation engine + LLM assistant</span>
+        <span>PostgreSQL</span>
+        <span>GPS / geospatial APIs</span>
+        <span>Secure, scalable cloud APIs</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-darker">
+  <div class="wrap">
+    <div class="foot-top">
+      <a href="#top" class="foot-brand">
+        <svg width="22" height="22" viewBox="0 0 26 26" fill="none"><path d="M3 19L9.5 8L13.5 14.5L16 11L23 19" stroke="#EDF2EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="6.5" r="2.5" fill="#D98F1B"/></svg>
+        TourEase
+      </a>
+      <ul class="foot-links">
+        <li><a href="#problem">Why TourEase</a></li>
+        <li><a href="#planner">Trip planner</a></li>
+        <li><a href="#flow">How it works</a></li>
+        <li><a href="#ecosystem">Impact</a></li>
+        <li><a href="#providers">For providers</a></li>
+      </ul>
+    </div>
+    <div class="foot-bottom">
+      <span>Smart India Hackathon 2026 · Problem Statement SIH26204 · Team GARH KUMAO WARRIORS</span>
+      <span>Travel &amp; Tourism · Software</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }));
+
+  // Days stepper
+  const daysValue = document.getElementById('daysValue');
+  let days = 4;
+  document.getElementById('daysMinus').addEventListener('click', () => {
+    days = Math.max(1, days - 1);
+    daysValue.textContent = days;
+  });
+  document.getElementById('daysPlus').addEventListener('click', () => {
+    days = Math.min(14, days + 1);
+    daysValue.textContent = days;
+  });
+
+  // Budget slider
+  const budgetInput = document.getElementById('budget');
+  const budgetValue = document.getElementById('budgetValue');
+  const formatRupees = (n) => '₹' + Number(n).toLocaleString('en-IN');
+  budgetInput.addEventListener('input', () => {
+    budgetValue.textContent = formatRupees(budgetInput.value);
+  });
+
+  // Interest chips (multi-select)
+  const interestGroup = document.getElementById('interestGroup');
+  interestGroup.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('is-active'));
+  });
+
+  // Itinerary generation data
+  const activityPool = {
+    trek: [
+      "Sunrise walk to a ridge viewpoint with a local trekking guide",
+      "Half-day trail through oak and rhododendron forest",
+      "Village-to-village walking route, guided by your homestay host"
+    ],
+    temple: [
+      "Morning visit to a village temple, timed around local rituals",
+      "Short pilgrimage walk with a local family as your guide",
+      "Quiet time at a lesser-known shrine away from the main crowds"
+    ],
+    food: [
+      "Breakfast of local millets and mountain greens at your homestay",
+      "Evening market walk, tasting seasonal produce and street food",
+      "Cooking session with your host, using produce from their own terrace"
+    ],
+    offbeat: [
+      "Walk through a village most maps don't mark",
+      "Afternoon at a weaving or craft workshop run by a local family",
+      "Visit to a terrace-farming community rarely seen by outside visitors"
+    ],
+    adventure: [
+      "Short rock-scramble or river-crossing route with a certified guide",
+      "Afternoon rafting or rappelling session, weather permitting",
+      "Mountain-biking stretch along a forest service road"
+    ],
+    wellness: [
+      "Slow morning of yoga on the homestay terrace",
+      "An afternoon of rest, reading and mountain air — no itinerary at all",
+      "Evening by the fire with your host's family, no agenda"
+    ]
+  };
+  const interestLabels = {
+    trek: "Trekking & nature", temple: "Temples & pilgrimage", food: "Food & local markets",
+    offbeat: "Offbeat villages", adventure: "Adventure sports", wellness: "Wellness & slow travel"
+  };
+
+  function stayLine(budget){
+    if (budget < 1500) return "Stay: a homestay with a local family, meals included.";
+    if (budget < 3200) return "Stay: a boutique homestay or small guesthouse.";
+    return "Stay: a heritage stay or hillside property, with a private guide on call.";
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', () => {
+    const region = document.getElementById('region').value;
+    const budget = Number(budgetInput.value);
+    const activeChips = Array.from(interestGroup.querySelectorAll('.chip.is-active')).map(c => c.dataset.key);
+    const chosen = activeChips.length ? activeChips : ['trek', 'food'];
+
+    const panel = document.getElementById('itineraryPanel');
+    panel.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className = 'itinerary-head';
+    head.innerHTML = `<h3>${days}-day route · ${region}</h3><span>${formatRupees(budget)} / day</span>`;
+    panel.appendChild(head);
+
+    const list = document.createElement('div');
+    list.className = 'itinerary-list';
+
+    for (let i = 0; i < days; i++) {
+      const key = chosen[i % chosen.length];
+      const pool = activityPool[key];
+      const activity = pool[i % pool.length];
+
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      let title = `Day ${i + 1} · ${interestLabels[key]}`;
+      let lead = activity;
+      if (i === 0) lead = "Arrival, orientation with your host, and a short local walk to settle in.";
+      if (i === days - 1 && days > 1) lead = "A slow morning before departure — no rush to check out.";
+
+      card.innerHTML = `<div class="day-title">${title}</div><p>${lead}</p><p>${stayLine(budget)}</p>`;
+      list.appendChild(card);
+    }
+
+    panel.appendChild(list);
+
+    const foot = document.createElement('div');
+    foot.className = 'itinerary-foot';
+    foot.textContent = 'Route drafted from your preferences — feedback after the trip sharpens the next one.';
+    panel.appendChild(foot);
+  });
+</script>
+
+</body>
+</html>
